@@ -29,7 +29,8 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ubuntu/m1-starter-app
-            
+            pwd
+            ls
             # write secrets into .env
             cat > .env <<EOF
             PORT=${{ secrets.PROD_PORT }}
