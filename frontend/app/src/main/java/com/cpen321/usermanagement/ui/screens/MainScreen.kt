@@ -1,11 +1,16 @@
 package com.cpen321.usermanagement.ui.screens
 
 import Icon
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import com.cpen321.usermanagement.R
 import com.cpen321.usermanagement.ui.components.MessageSnackbar
 import com.cpen321.usermanagement.ui.components.MessageSnackbarState
@@ -42,6 +48,7 @@ fun MainScreen(
         uiState = uiState,
         snackBarHostState = snackBarHostState,
         onProfileClick = onProfileClick,
+        onJokeClick = mainViewModel::loadRandomJoke,
         onSuccessMessageShown = mainViewModel::clearSuccessMessage
     )
 }
@@ -51,6 +58,7 @@ private fun MainContent(
     uiState: MainUiState,
     snackBarHostState: SnackbarHostState,
     onProfileClick: () -> Unit,
+    onJokeClick: () -> Unit,
     onSuccessMessageShown: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -67,7 +75,9 @@ private fun MainContent(
             )
         }
     ) { paddingValues ->
-        MainBody(paddingValues = paddingValues)
+        MainBody(paddingValues = paddingValues,
+                 uiState = uiState,
+                 onJokeClick = onJokeClick)
     }
 }
 
@@ -148,18 +158,56 @@ private fun MainSnackbarHost(
 @Composable
 private fun MainBody(
     paddingValues: PaddingValues,
+    uiState: MainUiState,
+    onJokeClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(paddingValues),
-        contentAlignment = Alignment.Center
+            .padding(paddingValues)
+            .padding(LocalSpacing.current.large),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(LocalSpacing.current.large)
     ) {
         WelcomeMessage()
+
+        JokeButton(onClick = onJokeClick)
+
+        if (uiState.currentJoke != null) {
+            JokeDisplay(joke = uiState.currentJoke)
+        }
     }
 }
 
+@Composable
+private fun JokeButton(
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text("Get Dad Joke")
+    }
+}
+
+@Composable
+private fun JokeDisplay(
+    joke: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = joke,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(LocalSpacing.current.medium),
+            textAlign = TextAlign.Center
+        )
+    }
+}
 @Composable
 private fun WelcomeMessage(
     modifier: Modifier = Modifier

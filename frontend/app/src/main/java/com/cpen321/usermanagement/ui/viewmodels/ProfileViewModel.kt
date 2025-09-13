@@ -24,7 +24,6 @@ data class ProfileUiState(
     val user: User? = null,
     val allHobbies: List<String> = emptyList(),
     val selectedHobbies: Set<String> = emptySet(),
-    val currentJoke: String? = null,
 
     // Message states
     val errorMessage: String? = null,
@@ -89,27 +88,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun loadRandomJoke() {
-        viewModelScope.launch {
-            try {
-                val response = jokeInterface.getRandomJoke()
-                if (response.isSuccessful && response.body() != null) {
-                    _uiState.value = _uiState.value.copy(
-                        currentJoke = response.body()!!.joke,
-                        successMessage = "Here's a dad joke for you!"
-                    )
-                } else {
-                    _uiState.value = _uiState.value.copy(
-                        errorMessage = "Failed to fetch joke"
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    errorMessage = "Network error: ${e.message}"
-                )
-            }
-        }
-    }
+
 
     fun toggleHobby(hobby: String) {
         val currentSelected = _uiState.value.selectedHobbies.toMutableSet()
