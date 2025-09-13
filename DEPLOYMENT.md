@@ -2,6 +2,6 @@
 
 ## Deployment info
 
-The public IP of your back-end server: [SERVER_PUBLIC_IP]
+The public IP of your back-end server: [http://ec2-3-140-182-153.us-east-2.compute.amazonaws.com]
 
-Domain name (if any): [SERVER_PUBLIC_NAME_OR_EMPTY]
+Domain name (if any): []

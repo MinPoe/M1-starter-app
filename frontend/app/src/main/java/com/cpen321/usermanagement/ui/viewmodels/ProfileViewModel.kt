@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cpen321.usermanagement.data.remote.api.RetrofitClient
 import com.cpen321.usermanagement.data.remote.dto.User
 import com.cpen321.usermanagement.data.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,7 @@ data class ProfileUiState(
     val user: User? = null,
     val allHobbies: List<String> = emptyList(),
     val selectedHobbies: Set<String> = emptySet(),
+    val currentJoke: String? = null,
 
     // Message states
     val errorMessage: String? = null,
@@ -40,7 +42,7 @@ class ProfileViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
-
+    private val jokeInterface = RetrofitClient.jokeInterface
     fun loadProfile() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoadingProfile = true, errorMessage = null)
@@ -82,6 +84,28 @@ class ProfileViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     isLoadingProfile = false,
                     errorMessage = errorMessage
+                )
+            }
+        }
+    }
+
+    fun loadRandomJoke() {
+        viewModelScope.launch {
+            try {
+                val response = jokeInterface.getRandomJoke()
+                if (response.isSuccessful && response.body() != null) {
+                    _uiState.value = _uiState.value.copy(
+                        currentJoke = response.body()!!.joke,
+                        successMessage = "Here's a dad joke for you!"
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Failed to fetch joke"
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Network error: ${e.message}"
                 )
             }
         }
@@ -154,7 +178,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(name: String, bio: String, onSuccess: () -> Unit = {}) {
+    fun updateProfile(name: String, bio: String, profilePicture: String, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _uiState.value =
                 _uiState.value.copy(
@@ -163,7 +187,7 @@ class ProfileViewModel @Inject constructor(
                     successMessage = null
                 )
 
-            val result = profileRepository.updateProfile(name, bio)
+            val result = profileRepository.updateProfile(name, bio, profilePicture)
             if (result.isSuccess) {
                 val updatedUser = result.getOrNull()!!
                 _uiState.value = _uiState.value.copy(

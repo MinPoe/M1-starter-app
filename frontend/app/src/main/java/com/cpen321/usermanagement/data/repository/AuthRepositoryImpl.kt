@@ -201,4 +201,24 @@ class AuthRepositoryImpl @Inject constructor(
         }
         return false
     }
+
+    override suspend fun deleteAccount(): Result<Unit> {
+        return try {
+            val response = userInterface.deleteProfile("") // Auth header handled by interceptor
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                val errorBodyString = response.errorBody()?.string()
+                val errorMessage = JsonUtils.parseErrorMessage(
+                    errorBodyString,
+                    "Failed to delete account."
+                )
+                Log.e(TAG, "Account deletion failed: $errorMessage")
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during account deletion", e)
+            Result.failure(e)
+        }
+    }
 }

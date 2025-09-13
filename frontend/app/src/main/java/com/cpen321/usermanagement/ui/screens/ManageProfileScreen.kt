@@ -151,11 +151,16 @@ fun ManageProfileScreen(
 
     val actions = ManageProfileScreenActions(
         onBackClick = onBackClick,
-        onNameChange = { formState = formState.copy(name = it) },
+        onNameChange = { newName ->
+            if (newName.length <= 20) { // character limit
+                formState = formState.copy(name = newName)
+            }
+        },
         onBioChange = { formState = formState.copy(bio = it) },
         onEditPictureClick = { showImagePickerDialog = true },
         onSaveClick = {
-            profileViewModel.updateProfile(formState.name, formState.bio)
+            val currentProfilePicture = profileViewModel.uiState.value.user?.profilePicture ?: ""
+            profileViewModel.updateProfile(formState.name, formState.bio, currentProfilePicture)
         },
         onImagePickerDismiss = { showImagePickerDialog = false },
         onImageSelected = { uri ->
@@ -446,18 +451,16 @@ private fun ProfileFields(
             enabled = false
         )
 
-        Row(Modifier.focusProperties { canFocus = false }) {
-            OutlinedTextField(
-                value = data.bio,
-                onValueChange = data.onBioChange,
-                label = { Text(stringResource(R.string.bio)) },
-                placeholder = { Text(stringResource(R.string.bio_placeholder)) },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3,
-                maxLines = 5,
-                readOnly = true
-            )
-        }
+        OutlinedTextField(
+            value = data.bio,
+            onValueChange = data.onBioChange,
+            label = { Text(stringResource(R.string.bio)) },
+            placeholder = { Text(stringResource(R.string.bio_placeholder)) },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3,
+            maxLines = 5,
+            readOnly = false
+        )
     }
 }
 
